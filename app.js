@@ -36,8 +36,8 @@ startBtn.addEventListener('click', () => {
     questions.length = 0; // Reset questions array
 
     for (let k = 0; k < random_number.length; k++) {
-        // let i = random_number[k];
-        let i = k;
+        let i = random_number[k];
+        
         let count = answer_questions[i].length;
         let answer = [];
 
