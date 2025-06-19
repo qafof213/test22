@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF to Text Converter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f9;
+        }
+        .container {
+            text-align: center;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 300px;
+        }
+        .container h1 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+        .container input[type="file"] {
+            margin: 10px 0;
+        }
+        .container button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .container button:hover {
+            background-color: #0056b3;
+        }
+        .output {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>PDF to Text Converter</h1>
+        <input type="file" id="pdfFile" accept="application/pdf">
+        <button id="convertBtn">Extract and Save Text</button>
+        <div class="output" id="output"></div>
+    </div>
+
+    <script>
+        document.getElementById('convertBtn').addEventListener('click', async () => {
+            const fileInput = document.getElementById('pdfFile');
+            const outputDiv = document.getElementById('output');
+
+            if (!fileInput.files.length) {
+                alert('Please upload a PDF file.');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = async function() {
+                const pdfData = new Uint8Array(this.result);
+                const pdf = await pdfjsLib.getDocument({ data: pdfData }).promise;
+                let extractedText = '';
+
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+                    textContent.items.forEach(item => {
+                        extractedText += item.str + ' ';
+                    });
+                }
+
+                // Display text on the webpage
+                outputDiv.textContent = extractedText.trim();
+
+                // Save text as a .txt file
+                const blob = new Blob([extractedText.trim()], { type: 'text/plain' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = 'extracted_text.txt';
+                link.click();
+            };
+
+            reader.readAsArrayBuffer(file);
+        });
+    </script>
+</body>
+</html>
